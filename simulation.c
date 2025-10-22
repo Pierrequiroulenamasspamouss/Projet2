@@ -203,6 +203,13 @@ void simulationStep(Simulation *sim)
                 {
                     sim->processed[i][j] = true;
 
+                      if (animalGetEnergy(animal) <= 0)
+                    {
+                        // L'animal meurt et laisse une case vide
+                        gridMakeEmpty(sim->grid, pos);
+                        
+                        continue;
+                    }
                     // trouver l'action a faire
                     Action action = animalFindAction(animal, sim->grid, pos);
 

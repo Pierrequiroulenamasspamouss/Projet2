@@ -5,7 +5,9 @@ Pierre a fait les fonctions de base, c'est à dire :
 -rabbit.c
 
 il reste à corriger simulation.c :
-    - souci d'herbe qui pousse sur les lapins
-    - operations de simulation pas dans le bon ordre
+    - operations de simulation pas dans le bon ordre je crois
     - nettoyer le code 
     - ajouter commentaires
+    - completer le rapport
+    - faire plein de tests pour voir si y'a pas des trucs bizarres dans la simulation ( ex: lapins fantômes, loups immortels,etc...)
+    - trouver un equilibre entre loups et lapins

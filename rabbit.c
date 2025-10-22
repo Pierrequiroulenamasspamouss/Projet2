@@ -35,6 +35,7 @@ static int calculateRabbitScore(Grid *grid, Position current, Position target, i
 
 static Action rabbitFindAction(Animal *rabbit, Grid *grid, Position pos)
 {
+    (void) rabbit;
     // 5 mouvements possibles
     Move moves[5] = {
         {0, 0},  // paboujé
