@@ -10,13 +10,13 @@
 
 static int calculateRabbitScore(Grid *grid, Position current, Position target, int maxDist)
 {
-    // Si la case est en dehors de la grille
+    // verif si la case est en dehors de la grille
     if (gridCellIsOutside(grid, target))
     {
         return INT_MIN;
     }
     
-    // Si la case contient un animal (autre que le lapin lui-même)
+    // sinon si la case contient deja un autre animal
     if (gridCellIsAnimal(grid, target))
     {
         if (target.row != current.row || target.col != current.col)
@@ -25,30 +25,30 @@ static int calculateRabbitScore(Grid *grid, Position current, Position target, i
         }
     }
     
-    // Calculer distances
+    // check distances
     int dg = gridFindClosestGrass(grid, target, maxDist);
     int dw = gridFindClosestAnimal(grid, target, maxDist, wolfName);
     
-    // Score = -wg*dg + ww*dw
+    // score = -wg*dg + ww*dw
     return -rabbitGrassWeight * dg + rabbitWolfWeight * dw;
 }
 
 static Action rabbitFindAction(Animal *rabbit, Grid *grid, Position pos)
 {
-    // 5 mouvements possibles (sur place, gauche, droite, haut, bas)
+    // 5 mouvements possibles
     Move moves[5] = {
-        {0, 0},  // sur place
-        {-1, 0}, // haut
-        {1, 0},  // bas
-        {0, -1}, // gauche
-        {0, 1}   // droite
+        {0, 0},  // paboujé
+        {-1, 0}, // ho
+        {1, 0},  // ba
+        {0, -1}, // gosh
+        {0, 1}   // drwat
     };
     
     int bestScore = INT_MIN;
-    Move bestMoves[5];
+    Move bestMoves[5]; // array de taille 5 pour max 5 bons mouvements
     int bestCount = 0;
     
-    // Parcourir toutes les positions possibles
+    // regarder toutes les positions possibles
     for (int m = 0; m < 5; m++)
     {
         Position newPos = {pos.row + moves[m].drow, pos.col + moves[m].dcol};
@@ -66,18 +66,18 @@ static Action rabbitFindAction(Animal *rabbit, Grid *grid, Position pos)
         }
     }
     
-    // Si aucun mouvement valide, rester sur place
+    // paboujer si aucun mouvement valide
     if (bestCount == 0)
     {
         Action action = {false, moves[0]};
         return action;
     }
     
-    // Choisir aléatoirement parmi les meilleurs mouvements
+    // au pif parmi les mouvements qu'il peut faire
     Move chosenMove = bestMoves[rand() % bestCount];
     Position finalPos = {pos.row + chosenMove.drow, pos.col + chosenMove.dcol};
     
-    // Vérifier si on peut manger de l'herbe à la position finale
+    // check si on peut manger de l'herbe a position finale
     bool canEat = gridCellIsGrass(grid, finalPos);
     
     Action action = {canEat, chosenMove};
@@ -86,7 +86,7 @@ static Action rabbitFindAction(Animal *rabbit, Grid *grid, Position pos)
 
 static Animal *rabbitReproduce(Animal *rabbit)
 {
-    // La reproduction se fait si l'énergie DÉPASSE le seuil
+    // juste reproduire si seuil depasse
     if (animalGetEnergy(rabbit) > rabbitReproduceThreshold)
     {
         animalSetEnergy(rabbit, animalGetEnergy(rabbit) - rabbitReproduceEnergy);

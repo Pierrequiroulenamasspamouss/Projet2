@@ -41,10 +41,10 @@ Simulation *simulationCreate(int height, int width)
 
     for (int i = 0; i < height; i++)
     {
-        sim->processed[i] = calloc(width, sizeof(bool)); 
+        sim->processed[i] = calloc(width, sizeof(bool));
         if (!sim->processed[i])
         {
-            // Libérer la mémoire déjà allouée en cas d'erreur
+            // liberer la memoire deja allouee en cas d'erreur
             for (int j = 0; j < i; j++)
             {
                 free(sim->processed[j]);
@@ -134,7 +134,7 @@ static int countAdjacentGrass(Grid *grid, Position pos)
     int height = gridGetHeight(grid);
     int width = gridGetWidth(grid);
 
-    // Positions adjacentes (haut, bas, gauche, droite)
+    // regarder aux alentours ( dessous, dessus, gauche, droite)
     int drow[] = {-1, 1, 0, 0};
     int dcol[] = {0, 0, -1, 1};
 
@@ -161,7 +161,7 @@ void simulationStep(Simulation *sim)
     int height = gridGetHeight(sim->grid);
     int width = gridGetWidth(sim->grid);
 
-    // Réinitialiser le tableau processed
+    // reset le tableau processed pour cette etape
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
@@ -170,7 +170,7 @@ void simulationStep(Simulation *sim)
         }
     }
 
-    // Trouver la priorité maximale
+    // on trouve la priorite
     unsigned int maxPriority = 0;
     for (int i = 0; i < height; i++)
     {
@@ -189,7 +189,7 @@ void simulationStep(Simulation *sim)
         }
     }
 
-    // Pour chaque priorité
+    // dans l'ordre demande ? pas sur
     for (unsigned int p = 0; p <= maxPriority; p++)
     {
         for (int i = 0; i < height; i++)
@@ -203,46 +203,43 @@ void simulationStep(Simulation *sim)
                 {
                     sim->processed[i][j] = true;
 
-                    
-                    // Déterminer l'action
+                    // trouver l'action a faire
                     Action action = animalFindAction(animal, sim->grid, pos);
 
-                    // Calculer la nouvelle position
+                    Position oldPos = pos;
+                    // calculer la nouvelle position
                     Position newPos = {
                         pos.row + action.move.drow,
                         pos.col + action.move.dcol};
 
-                    // VÉRIFIER si la nouvelle position est valide
+                    // check si newPos est valide => est ce qu'on peut s'y deplacer
                     if (newPos.row < 0 || newPos.row >= height ||
                         newPos.col < 0 || newPos.col >= width)
                     {
-                        // Position invalide - ne pas bouger
+                        // position invalide => ne pas bouger
                         newPos = pos;
                     }
                     else
                         animalLoseEnergy(animal);
 
-                    Position oldPos = pos;
-
-                    // Déplacer l'animal seulement si la position a changé
                     if (newPos.row != pos.row || newPos.col != pos.col)
                     {
                         gridMoveAnimal(sim->grid, pos, newPos);
-                        // Marquer la nouvelle position comme traitée
+                        // la nouvelle position est traitee
                         sim->processed[newPos.row][newPos.col] = true;
                     }
 
-                    // Si l'animal se nourrit
+                    // bouffer
                     if (action.eat)
                     {
                         animalEat(animal);
                     }
 
-                    // Vérifier la reproduction
+                    // se reproduire
                     Animal *newborn = animalReproduce(animal);
                     if (newborn)
                     {
-                        // VÉRIFIER que l'ancienne position est libre avant d'ajouter le nouveau-né
+                        // verif si oldPos est pas de nouveau utilisee avant de mettre un bebe
                         if (gridGetAnimal(sim->grid, oldPos) == NULL)
                         {
                             gridAddAnimal(sim->grid, newborn, oldPos);
@@ -250,7 +247,7 @@ void simulationStep(Simulation *sim)
                         }
                         else
                         {
-                            // Si l'ancienne position est occupée, libérer le nouveau-né
+                            // tuer le bebe si deja occupe
                             animalDie(newborn);
                         }
                     }
@@ -259,7 +256,7 @@ void simulationStep(Simulation *sim)
         }
     }
 
-    // Croissance de l'herbe
+    // l'herbe pousse
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
@@ -267,7 +264,7 @@ void simulationStep(Simulation *sim)
             Position pos = {i, j};
 
             if (gridGetAnimal(sim->grid, pos) == NULL && !gridCellIsGrass(sim->grid, pos))
-            
+
             {
                 int K = countAdjacentGrass(sim->grid, pos);
                 double ph = grassProb + K * grassIncProb;

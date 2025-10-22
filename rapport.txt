@@ -1,0 +1,11 @@
+Pierre a fait les fonctions de base, c'est à dire :
+-wolf.c
+-animal.c
+-grid.c
+-rabbit.c
+
+il reste à corriger simulation.c :
+    - souci d'herbe qui pousse sur les lapins
+    - operations de simulation pas dans le bon ordre
+    - nettoyer le code 
+    - ajouter commentaires

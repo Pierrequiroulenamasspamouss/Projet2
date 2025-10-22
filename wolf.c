@@ -11,13 +11,13 @@
 #include "string.h"
 static int calculateWolfScore(Grid *grid, Position current, Position target, int maxDist)
 {
-    // Si la case est en dehors de la grille
+    // si la case est en dehors de la grille
     if (gridCellIsOutside(grid, target))
     {
         return INT_MIN;
     }
 
-    // Si la case contient un autre loup (pas le loup actuel)
+    // si la case contient un autre loup
     if (gridCellIsAnimal(grid, target))
     {
         Animal *occupant = gridGetAnimal(grid, target);
@@ -31,15 +31,14 @@ static int calculateWolfScore(Grid *grid, Position current, Position target, int
         }
     }
 
-    // Calculer distance au lapin le plus proche
+    // distance au lapin le plus proche
     int dr = gridFindClosestAnimal(grid, target, maxDist, rabbitName);
-
-    // Score = -dr (on veut minimiser la distance)
-    return -dr;
+    return -dr; // -dr car on veut trouver la distance minimale -> plus proche = moins negatif
 }
 
 static Action wolfFindAction(Animal *wolf, Grid *grid, Position pos)
 {
+    (void)wolf; // on se sert pas de son état
     // Les 13 mouvements possibles
     Move moves[13] = {
         {0, 0},   // paboujer
@@ -47,10 +46,10 @@ static Action wolfFindAction(Animal *wolf, Grid *grid, Position pos)
         {1, 0},   // ba 1
         {0, -1},  // gosh 1
         {0, 1},   // drwat 1
-        {-2, 0},  // ho 2
-        {2, 0},   // ba 2
-        {0, -2},  // gosh 2
-        {0, 2},   // drwat 2
+        {-2, 0},  // ho x2
+        {2, 0},   // ba x2
+        {0, -2},  // gosh x2
+        {0, 2},   // drwat x2
         {-1, -1}, // haut-gauche
         {-1, 1},  // haut-droite
         {1, -1},  // bas-gauche
@@ -61,7 +60,7 @@ static Action wolfFindAction(Animal *wolf, Grid *grid, Position pos)
     Move bestMoves[13];
     int bestCount = 0;
 
-    // tester toutes les pos possibles
+    // tester toutes les positions possibles
     for (int m = 0; m < 13; m++)
     {
         Position newPos = {pos.row + moves[m].drow, pos.col + moves[m].dcol};
@@ -87,20 +86,18 @@ static Action wolfFindAction(Animal *wolf, Grid *grid, Position pos)
         return action;
     }
 
-    // Choisir aléatoirement parmi les meilleurs mouvements
+    // au pif parmi les meilleurs mouvements
     Move chosenMove = bestMoves[rand() % bestCount];
     Position finalPos = {pos.row + chosenMove.drow, pos.col + chosenMove.dcol};
 
-        // Vérifier si on peut manger un lapin seulement si l'énergie n'est pas pleine
+    // check si la nouvelle case permet de bouffer le lapin
     bool canEat = false;
-    if (animalGetEnergy(wolf) < wolfReproduceThreshold) {
-        if (gridCellIsAnimal(grid, finalPos))
+    if (gridCellIsAnimal(grid, finalPos))
+    {
+        Animal *target = gridGetAnimal(grid, finalPos);
+        if (target && strcmp(animalGetName(target), rabbitName) == 0)
         {
-            Animal *target = gridGetAnimal(grid, finalPos);
-            if (target && strcmp(animalGetName(target), rabbitName) == 0)
-            {
-                canEat = true;
-            }
+            canEat = true;
         }
     }
 
@@ -117,6 +114,7 @@ static Animal *wolfReproduce(Animal *wolf)
     }
     return NULL;
 }
+
 Animal *wolfCreate(void)
 {
     return animalCreate(
