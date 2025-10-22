@@ -205,7 +205,7 @@ void simulationStep(Simulation *sim)
 
                       if (animalGetEnergy(animal) <= 0)
                     {
-                        // L'animal meurt et laisse une case vide
+                        // l'animal meurt et laisse une case vide
                         gridMakeEmpty(sim->grid, pos);
                         
                         continue;
