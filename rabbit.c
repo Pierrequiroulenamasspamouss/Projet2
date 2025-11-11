@@ -15,7 +15,7 @@ static int calculateRabbitScore(Grid *grid, Position current, Position target, i
     {
         return INT_MIN;
     }
-    
+
     // sinon si la case contient deja un autre animal
     if (gridCellIsAnimal(grid, target))
     {
@@ -24,37 +24,37 @@ static int calculateRabbitScore(Grid *grid, Position current, Position target, i
             return INT_MIN;
         }
     }
-    
+
     // check distances
     int dg = gridFindClosestGrass(grid, target, maxDist);
     int dw = gridFindClosestAnimal(grid, target, maxDist, wolfName);
-    
+
     // score = -wg*dg + ww*dw
     return -rabbitGrassWeight * dg + rabbitWolfWeight * dw;
 }
 
 static Action rabbitFindAction(Animal *rabbit, Grid *grid, Position pos)
 {
-    (void) rabbit;
+    (void)rabbit;
     // 5 mouvements possibles
     Move moves[5] = {
-        {0, 0},  // paboujé
-        {-1, 0}, // ho
-        {1, 0},  // ba
-        {0, -1}, // gosh
-        {0, 1}   // drwat
+        {0, 0},  // pas bouger
+        {-1, 0}, // haut
+        {1, 0},  // bas
+        {0, -1}, // gauche
+        {0, 1}   // droite
     };
-    
+
     int bestScore = INT_MIN;
     Move bestMoves[5]; // array de taille 5 pour max 5 bons mouvements
     int bestCount = 0;
-    
+
     // regarder toutes les positions possibles
     for (int m = 0; m < 5; m++)
     {
         Position newPos = {pos.row + moves[m].drow, pos.col + moves[m].dcol};
         int score = calculateRabbitScore(grid, pos, newPos, rabbitMaxDistance);
-        
+
         if (score > bestScore)
         {
             bestScore = score;
@@ -66,21 +66,21 @@ static Action rabbitFindAction(Animal *rabbit, Grid *grid, Position pos)
             bestMoves[bestCount++] = moves[m];
         }
     }
-    
-    // paboujer si aucun mouvement valide
+
+    // pas bouger si aucun mouvement valide
     if (bestCount == 0)
     {
         Action action = {false, moves[0]};
         return action;
     }
-    
+
     // au pif parmi les mouvements qu'il peut faire
     Move chosenMove = bestMoves[rand() % bestCount];
     Position finalPos = {pos.row + chosenMove.drow, pos.col + chosenMove.dcol};
-    
+
     // check si on peut manger de l'herbe a position finale
     bool canEat = gridCellIsGrass(grid, finalPos);
-    
+
     Action action = {canEat, chosenMove};
     return action;
 }
@@ -93,6 +93,7 @@ static Animal *rabbitReproduce(Animal *rabbit)
         animalSetEnergy(rabbit, animalGetEnergy(rabbit) - rabbitReproduceEnergy);
         return rabbitCreate();
     }
+
     return NULL;
 }
 

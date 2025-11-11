@@ -7,7 +7,7 @@ const unsigned int wolfPriority = 0;
 const unsigned int rabbitPriority = 1;
 
 const int rabbitMaxDistance = 4;
-const int wolfMaxDistance = 20;
+const int wolfMaxDistance = 6;
 
 const int rabbitInitEnergy = 50;
 const int rabbitActionEnergy = 5;

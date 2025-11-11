@@ -16,6 +16,11 @@ struct Simulation_t
     bool **processed; // tableau des animaux traites
 };
 
+Grid *simulationGetGrid(Simulation *sim)
+{
+    return sim->grid;
+}
+
 Simulation *simulationCreate(int height, int width)
 {
     Simulation *sim = malloc(sizeof(Simulation));
@@ -41,7 +46,7 @@ Simulation *simulationCreate(int height, int width)
 
     for (int i = 0; i < height; i++)
     {
-        sim->processed[i] = calloc(width, sizeof(bool));
+        sim->processed[i] = calloc(width, sizeof(bool)); // calloc merci google pour initialiser une zone de la mémoire a zero
         if (!sim->processed[i])
         {
             // liberer la memoire deja allouee en cas d'erreur
@@ -49,9 +54,8 @@ Simulation *simulationCreate(int height, int width)
             {
                 free(sim->processed[j]);
             }
-            free(sim->processed);
-            gridFree(sim->grid);
-            free(sim);
+            // vider la memoire utilisee
+            simulationFree(sim);
             return NULL;
         }
     }
@@ -189,7 +193,6 @@ void simulationStep(Simulation *sim)
         }
     }
 
-    // dans l'ordre demande ? pas sur
     for (unsigned int p = 0; p <= maxPriority; p++)
     {
         for (int i = 0; i < height; i++)
@@ -199,15 +202,15 @@ void simulationStep(Simulation *sim)
                 Position pos = {i, j};
                 Animal *animal = gridGetAnimal(sim->grid, pos);
 
-                if (animal && animalGetPriority(animal) == p && !sim->processed[i][j])
+                if (animal && animalGetPriority(animal) == (unsigned int)p && !sim->processed[i][j])
                 {
                     sim->processed[i][j] = true;
 
-                      if (animalGetEnergy(animal) <= 0)
+                    if (animalGetEnergy(animal) <= 0)
                     {
                         // l'animal meurt et laisse une case vide
                         gridMakeEmpty(sim->grid, pos);
-                        
+
                         continue;
                     }
                     // trouver l'action a faire
@@ -240,29 +243,27 @@ void simulationStep(Simulation *sim)
                     if (action.eat)
                     {
                         animalEat(animal);
-                    }
-
-                    // se reproduire
-                    Animal *newborn = animalReproduce(animal);
-                    if (newborn)
-                    {
-                        // verif si oldPos est pas de nouveau utilisee avant de mettre un bebe
-                        if (gridGetAnimal(sim->grid, oldPos) == NULL)
+                        // se reproduire
+                        Animal *newborn = animalReproduce(animal);
+                        if (newborn)
                         {
-                            gridAddAnimal(sim->grid, newborn, oldPos);
-                            sim->processed[oldPos.row][oldPos.col] = true;
-                        }
-                        else
-                        {
-                            // tuer le bebe si deja occupe
-                            animalDie(newborn);
+                            // verif si oldPos est pas de nouveau utilisee avant de mettre un bebe
+                            if (gridGetAnimal(sim->grid, oldPos) == NULL)
+                            {
+                                gridAddAnimal(sim->grid, newborn, oldPos);
+                                sim->processed[oldPos.row][oldPos.col] = true;
+                            }
+                            else
+                            {
+                                // tuer le bebe si deja occupe
+                                animalDie(newborn);
+                            }
                         }
                     }
                 }
             }
         }
     }
-
     // l'herbe pousse
     for (int i = 0; i < height; i++)
     {
@@ -275,7 +276,8 @@ void simulationStep(Simulation *sim)
             {
                 int K = countAdjacentGrass(sim->grid, pos);
                 double ph = grassProb + K * grassIncProb;
-
+                if (ph > 1.0)
+                    ph = 1.0; // assurer que c'est max 100%
                 double r = (double)rand() / RAND_MAX;
                 if (r < ph)
                 {
@@ -286,9 +288,4 @@ void simulationStep(Simulation *sim)
     }
 
     sim->currentStep++;
-}
-
-Grid *simulationGetGrid(Simulation *sim)
-{
-    return sim->grid;
 }

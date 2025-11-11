@@ -68,6 +68,7 @@ void animalLoseEnergy(Animal *animal)
 {
     animal->energy -= animal->actionEnergy;
 }
+
 void animalEat(Animal *animal)
 {
     animal->energy += animal->eatEnergy;

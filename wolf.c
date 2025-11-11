@@ -1,14 +1,13 @@
 #include <stdlib.h>
-#include <limits.h> // Need for INT_MIN
-
+#include <limits.h>
 #include "animal.h"
 #include "grid.h"
 #include "constants.h"
 #include "position.h"
 #include "action.h"
-
 #include "wolf.h"
 #include "string.h"
+
 static int calculateWolfScore(Grid *grid, Position current, Position target, int maxDist)
 {
     // si la case est en dehors de la grille
@@ -21,7 +20,7 @@ static int calculateWolfScore(Grid *grid, Position current, Position target, int
     if (gridCellIsAnimal(grid, target))
     {
         Animal *occupant = gridGetAnimal(grid, target);
-        // CORRECTION : utiliser strcmp au lieu de ==
+        
         if (occupant && strcmp(animalGetName(occupant), wolfName) == 0)
         {
             if (target.row != current.row || target.col != current.col)
@@ -41,15 +40,15 @@ static Action wolfFindAction(Animal *wolf, Grid *grid, Position pos)
     (void)wolf; // on se sert pas de son état
     // Les 13 mouvements possibles
     Move moves[13] = {
-        {0, 0},   // paboujer
-        {-1, 0},  // ho 1
-        {1, 0},   // ba 1
-        {0, -1},  // gosh 1
-        {0, 1},   // drwat 1
-        {-2, 0},  // ho x2
-        {2, 0},   // ba x2
-        {0, -2},  // gosh x2
-        {0, 2},   // drwat x2
+        {0, 0},   // pas bouger
+        {-1, 0},  // haut 1
+        {1, 0},   // bas 1
+        {0, -1},  // gauche 1
+        {0, 1},   // droite 1
+        {-2, 0},  // haut 2
+        {2, 0},   // bas 2
+        {0, -2},  // gauche 2
+        {0, 2},   // droite 2
         {-1, -1}, // haut-gauche
         {-1, 1},  // haut-droite
         {1, -1},  // bas-gauche
@@ -79,18 +78,18 @@ static Action wolfFindAction(Animal *wolf, Grid *grid, Position pos)
         }
     }
 
-    // pas de mouvement valide -> paboujer
+    // pas de mouvement valide -> pas bouger
     if (bestCount == 0)
     {
         Action action = {false, moves[0]};
         return action;
     }
 
-    // au pif parmi les meilleurs mouvements
+    // au hasard parmi les meilleurs mouvements
     Move chosenMove = bestMoves[rand() % bestCount];
     Position finalPos = {pos.row + chosenMove.drow, pos.col + chosenMove.dcol};
 
-    // check si la nouvelle case permet de bouffer le lapin
+    // verifier si la nouvelle case permet de bouffer le lapin
     bool canEat = false;
     if (gridCellIsAnimal(grid, finalPos))
     {
@@ -107,6 +106,7 @@ static Action wolfFindAction(Animal *wolf, Grid *grid, Position pos)
 
 static Animal *wolfReproduce(Animal *wolf)
 {
+    // meme idee que pour rabbitReproduce -> energie minimale necessaire
     if (animalGetEnergy(wolf) >= wolfReproduceThreshold)
     {
         animalSetEnergy(wolf, animalGetEnergy(wolf) - wolfReproduceEnergy);
@@ -117,6 +117,7 @@ static Animal *wolfReproduce(Animal *wolf)
 
 Animal *wolfCreate(void)
 {
+    // meme idee que pour rabbitCreate
     return animalCreate(
         wolfName,
         wolfPriority,

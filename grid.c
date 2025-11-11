@@ -11,8 +11,8 @@ struct Grid_t
 {
     int height;
     int width;
-    Animal ***animals; // Tableau 2D de pointeurs vers Animal
-    bool **grass;      // Tableau 2D pour l'herbe
+    Animal ***animals; // tableau 2D de pointeurs vers Animal
+    bool **grass;      // tableau 2D pour l'herbe
 };
 
 int gridGetWidth(Grid *grid)
@@ -34,7 +34,7 @@ Grid *gridCreateEmpty(int height, int width)
     grid->height = height;
     grid->width = width;
 
-    // Allouer le tableau d'animaux
+    // allouer le tableau d'animaux
     grid->animals = malloc(height * sizeof(Animal **));
     grid->grass = malloc(height * sizeof(bool *));
 
@@ -60,7 +60,7 @@ void gridFree(Grid *grid)
 
     for (int i = 0; i < grid->height; i++)
     {
-        // Libérer les animaux
+        // liberer les animaux
         for (int j = 0; j < grid->width; j++)
         {
             if (grid->animals[i][j])
@@ -98,36 +98,55 @@ void gridMoveAnimal(Grid *grid, Position pos, Position new_pos)
     if (gridCellIsOutside(grid, pos) || gridCellIsOutside(grid, new_pos))
         return;
 
+    // si meme position, ne rien faire
+    if (pos.row == new_pos.row && pos.col == new_pos.col)
+        return;
+    
     Animal *animal = grid->animals[pos.row][pos.col];
     if (!animal)
         return;
 
-    // si la destination contient un animal (lapin mangé par loup), le supprimer
-    if (grid->animals[new_pos.row][new_pos.col] != NULL)
+
+    // verif si pas deja autre animal sur la case:
+    Animal *occupant = grid->animals[new_pos.row][new_pos.col];
+    if (occupant != NULL)
     {
-        animalDie(grid->animals[new_pos.row][new_pos.col]); // il est ded le lapinou
+        // juste le loup tue le lapin et aucun autre animal
+        if (strcmp(animalGetName(animal), wolfName) == 0 &&
+            strcmp(animalGetName(occupant), rabbitName) == 0)
+        {
+            // le loup mange le lapin : tuer l'occupant
+            animalDie(occupant);
+            gridMakeEmpty(grid,pos);
+        }
+        else
+        {
+            // case occupee par autre animal : on ne bouge pas
+            return;
+        }
     }
 
-    // on bouge l'animal 
+    // si c’est un lapin et qu’il va sur de l’herbe, il la mange
+    if (strcmp(animalGetName(animal), rabbitName) == 0 &&
+        grid->grass[new_pos.row][new_pos.col])
+    {
+        animalEat(animal);
+    }
+    grid->grass[new_pos.row][new_pos.col] = false; // herbe detruite
+    
+    // on bouge l’animal
     grid->animals[new_pos.row][new_pos.col] = animal;
     grid->animals[pos.row][pos.col] = NULL;
 
-    // on retire l'herbe en bougeant pour tous les animaux -> juste le lapin va augmenter son energie s'il se deplace dessus
-    grid->grass[new_pos.row][new_pos.col] = false; 
-    
 }
+
 
 void gridMakeEmpty(Grid *grid, Position pos)
 {
     if (gridCellIsOutside(grid, pos))
         return;
 
-    if (grid->animals[pos.row][pos.col])
-    { // tuer l'animal sur la case -> mettre null
-        animalDie(grid->animals[pos.row][pos.col]);
-        grid->animals[pos.row][pos.col] = NULL;
-    }
-
+    grid->animals[pos.row][pos.col] = NULL;
     grid->grass[pos.row][pos.col] = false;
 }
 
