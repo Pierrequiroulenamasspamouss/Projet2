@@ -98,48 +98,27 @@ void gridMoveAnimal(Grid *grid, Position pos, Position new_pos)
     if (gridCellIsOutside(grid, pos) || gridCellIsOutside(grid, new_pos))
         return;
 
-    // si meme position, ne rien faire
+    // si même position, ne rien faire
     if (pos.row == new_pos.row && pos.col == new_pos.col)
         return;
-    
+        
     Animal *animal = grid->animals[pos.row][pos.col];
     if (!animal)
         return;
 
-
-    // verif si pas deja autre animal sur la case:
-    Animal *occupant = grid->animals[new_pos.row][new_pos.col];
-    if (occupant != NULL)
+    // si la destination contient un animal, ne rien faire
+    if (grid->animals[new_pos.row][new_pos.col] != NULL)
     {
-        // juste le loup tue le lapin et aucun autre animal
-        if (strcmp(animalGetName(animal), wolfName) == 0 &&
-            strcmp(animalGetName(occupant), rabbitName) == 0)
-        {
-            // le loup mange le lapin : tuer l'occupant
-            animalDie(occupant);
-            gridMakeEmpty(grid,pos);
-        }
-        else
-        {
-            // case occupee par autre animal : on ne bouge pas
-            return;
-        }
+        return; // on fait rien dans ce cas là 
     }
 
-    // si c’est un lapin et qu’il va sur de l’herbe, il la mange
-    if (strcmp(animalGetName(animal), rabbitName) == 0 &&
-        grid->grass[new_pos.row][new_pos.col])
-    {
-        animalEat(animal);
-    }
-    grid->grass[new_pos.row][new_pos.col] = false; // herbe detruite
-    
-    // on bouge l’animal
+    // on bouge l'animal 
+    gridMakeEmpty(grid,new_pos); // vide la nouvelle case car dans tous les cas y'a rien dessus apres ->lapin bouffe et loup pietine
     grid->animals[new_pos.row][new_pos.col] = animal;
-    grid->animals[pos.row][pos.col] = NULL;
-
+    
+    gridMakeEmpty(grid,pos);
+    
 }
-
 
 void gridMakeEmpty(Grid *grid, Position pos)
 {

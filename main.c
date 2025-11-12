@@ -24,14 +24,14 @@ static struct Config parseArg(int argc, char const *argv[]);
 
 static void printUsageAndExit(int value)
 {
-    const char usage[] = ("Usage: ./simulate -s <grid_dim> -t <num_steps> -w <wolf_prob> "
+    const char usage[] = "Usage: ./simulate -s <grid_dim> -t <num_steps> -w <wolf_prob> "
                           "-r <rabbit_prob> -g <grass_prob> -f <gif_file>\n"
                           "- grid_dim: height and width of the grid\n"
                           "- num_steps: number of steps of simulation\n"
                           "- wolf_prob: probability of having a wolf in a cell at initialization\n"
                           "- rabbit_prob: probability of having a rabbit in a cell at initialization\n"
                           "- grass_prob: probability of having a grass in a cell at initialization\n"
-                          "- gif_file: filename to store the gif\n");
+                          "- gif_file: filename to store the gif\n" ;
 
     fprintf(stderr, usage);
     exit(value);

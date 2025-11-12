@@ -20,7 +20,7 @@ static int calculateWolfScore(Grid *grid, Position current, Position target, int
     if (gridCellIsAnimal(grid, target))
     {
         Animal *occupant = gridGetAnimal(grid, target);
-        
+
         if (occupant && strcmp(animalGetName(occupant), wolfName) == 0)
         {
             if (target.row != current.row || target.col != current.col)
@@ -111,7 +111,9 @@ static Animal *wolfReproduce(Animal *wolf)
     {
         animalSetEnergy(wolf, animalGetEnergy(wolf) - wolfReproduceEnergy);
         return wolfCreate();
+        
     }
+
     return NULL;
 }
 

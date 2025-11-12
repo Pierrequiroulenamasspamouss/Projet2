@@ -193,7 +193,7 @@ void simulationStep(Simulation *sim)
         }
     }
 
-    for (unsigned int p = 0; p <= maxPriority; p++)
+    for (int p = maxPriority; p >= 0; p--)
     {
         for (int i = 0; i < height; i++)
         {
@@ -208,7 +208,8 @@ void simulationStep(Simulation *sim)
 
                     if (animalGetEnergy(animal) <= 0)
                     {
-                        // l'animal meurt et laisse une case vide
+                        // l'animal meurt 
+                        animalDie(animal);
                         gridMakeEmpty(sim->grid, pos);
 
                         continue;
@@ -222,29 +223,29 @@ void simulationStep(Simulation *sim)
                         pos.row + action.move.drow,
                         pos.col + action.move.dcol};
 
-                    // check si newPos est valide => est ce qu'on peut s'y deplacer
-                    if (newPos.row < 0 || newPos.row >= height ||
-                        newPos.col < 0 || newPos.col >= width)
+                    // si le loup veut manger (se deplacer sur un lapin), vider d'abord la case
+                    if (action.eat && gridCellIsAnimal(sim->grid, newPos))
                     {
-                        // position invalide => ne pas bouger
-                        newPos = pos;
-                    }
-                    else
-                        animalLoseEnergy(animal);
-
-                    if (newPos.row != pos.row || newPos.col != pos.col)
-                    {
-                        gridMoveAnimal(sim->grid, pos, newPos);
-                        // la nouvelle position est traitee
-                        sim->processed[newPos.row][newPos.col] = true;
+                        Animal *target = gridGetAnimal(sim->grid, newPos);
+                        if (target && strcmp(animalGetName(target), rabbitName) == 0)
+                        {
+                            animalDie(target);                // tuer le lapin
+                            gridMakeEmpty(sim->grid, newPos); // vider la case
+                        }
                     }
 
-                    // bouffer
+                    // maintenant deplacer l'animal
+                    gridMoveAnimal(sim->grid, pos, newPos);
+                    sim->processed[newPos.row][newPos.col] = true;
+                    animalLoseEnergy(animal); // perdre de l'energie dans tous les cas
+
+                    // bouffer et reproduire
                     if (action.eat)
                     {
                         animalEat(animal);
                         // se reproduire
                         Animal *newborn = animalReproduce(animal);
+
                         if (newborn)
                         {
                             // verif si oldPos est pas de nouveau utilisee avant de mettre un bebe
