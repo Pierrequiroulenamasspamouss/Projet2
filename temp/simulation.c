@@ -208,7 +208,7 @@ void simulationStep(Simulation *sim)
 
                     if (animalGetEnergy(animal) <= 0)
                     {
-                        // l'animal meurt
+                        // l'animal est supprimé
                         gridMakeEmpty(sim->grid, pos);
                         continue;
                     }
